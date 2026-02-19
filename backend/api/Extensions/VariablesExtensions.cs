@@ -6,5 +6,5 @@ public class AppVariablesExtensions
 
     public const string CollectionUsers = "users";
     public const string CollectionRooms = "rooms";
-    public const string CollectionChats = "chats";
+    public const string CollectionRoomsChats = "rooms-chats";
 }
