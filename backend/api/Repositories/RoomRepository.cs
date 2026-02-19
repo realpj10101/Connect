@@ -18,6 +18,7 @@ public class RoomRepository : IRoomRepository
 
     private readonly IMongoCollection<AppUser> _collectionUsers;
     private readonly IMongoCollection<Room> _collectionRooms;
+    private readonly IMongoCollection<RoomChat> _collectionChats;
     private readonly UserManager<AppUser> _userManager;
     private readonly IMongoClient _client;
 
@@ -26,6 +27,7 @@ public class RoomRepository : IRoomRepository
         var database = client.GetDatabase(dbSettings.DatabaseName);
         _collectionUsers = database.GetCollection<AppUser>(AppVariablesExtensions.CollectionUsers);
         _collectionRooms = database.GetCollection<Room>(AppVariablesExtensions.CollectionRooms);
+        _collectionChats = database.GetCollection<RoomChat>(AppVariablesExtensions.CollectionRoomsChats);
 
         _client = client;
         _userManager = userManager;
@@ -104,7 +106,7 @@ public class RoomRepository : IRoomRepository
 
         try
         {
-            await _collectionRooms.InsertOneAsync(room, null, cancellationToken);
+            await _collectionRooms.InsertOneAsync(session, room, null, cancellationToken);
 
             bool hasOwnerRole = await _userManager.IsInRoleAsync(targetUser, "owner");
             if (!hasOwnerRole)
@@ -149,6 +151,34 @@ public class RoomRepository : IRoomRepository
         return new(
             true,
             rooms,
+            null
+        );
+    }
+
+    public async Task<OperationResult> SavedMessageAsync(MessageRequest req, ObjectId userId, ObjectId roomId)
+    {
+        if (userId.Equals(userId) || roomId.Equals(roomId))
+        {
+            return new(
+                false,
+                Error: new CustomError(
+                    ErrorCode.InvalidData,
+                    "Invalid user ID or room ID."
+                )
+            );
+        }
+
+        RoomChat chat = new()
+        {
+           Id = ObjectId.GenerateNewId(),
+           RoomId = roomId,
+           SenderId = userId,
+           Message = req.Message,
+           TimeStamp = DateTime.UtcNow
+        };
+
+        return new(
+            true,
             null
         );
     }
