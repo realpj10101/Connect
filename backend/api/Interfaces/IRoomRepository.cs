@@ -10,5 +10,5 @@ public interface IRoomRepository
 {
     public Task<OperationResult> CreateRoomAsync(CreateRoomDto request, ObjectId userId, CancellationToken cancellationToken);
     public Task<OperationResult<PagedList<Room>>> GetAllAsync(PaginationParams paginationParams, CancellationToken cancellationToken);
-    public Task<OperationResult> SavedMessageAsync(MessageRequest req, ObjectId userId, ObjectId roomId);
+    public Task<OperationResult<MessageResponseDto>> SavedMessageAsync(MessageRequest req, ObjectId userId, ObjectId roomId, CancellationToken cancellationToken);
 }

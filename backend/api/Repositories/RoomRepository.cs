@@ -155,7 +155,7 @@ public class RoomRepository : IRoomRepository
         );
     }
 
-    public async Task<OperationResult> SavedMessageAsync(MessageRequest req, ObjectId userId, ObjectId roomId)
+    public async Task<OperationResult<MessageResponseDto>> SavedMessageAsync(MessageRequest req, ObjectId userId, ObjectId roomId, CancellationToken cancellationToken)
     {
         if (userId.Equals(userId) || roomId.Equals(roomId))
         {
@@ -164,6 +164,21 @@ public class RoomRepository : IRoomRepository
                 Error: new CustomError(
                     ErrorCode.InvalidData,
                     "Invalid user ID or room ID."
+                )
+            );
+        }
+        
+        string? senderUserName = await _collectionUsers.Find(user => user.Id == userId)
+            .Project(user => user.UserName)
+            .FirstOrDefaultAsync();
+
+        if (senderUserName is null)
+        {
+            return new(
+                false,
+                Error: new CustomError(
+                    ErrorCode.UserNotFound,
+                    "The given user does not exist."
                 )
             );
         }
@@ -177,8 +192,15 @@ public class RoomRepository : IRoomRepository
            TimeStamp = DateTime.UtcNow
         };
 
+        await _collectionChats.InsertOneAsync(chat, null, cancellationToken);
+
         return new(
             true,
+            new MessageResponseDto(
+                Message: req.Message,
+                SenderUserName: senderUserName,
+                TimeStamp: chat.TimeStamp
+            ),
             null
         );
     }
