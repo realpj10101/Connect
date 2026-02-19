@@ -12,4 +12,5 @@ public enum ErrorCode
     AssignRoleFailed,
     UserAlreadyExist,
     UpdateFailed,
+    InvalidData
 }
