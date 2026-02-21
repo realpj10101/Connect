@@ -508,3 +508,6 @@ client/typings
 # System files
 client/.DS_Store
 client/Thumbs.db
+
+# Ignore Angular source maps in the frontend folder
+frontend/**/*.js.map
